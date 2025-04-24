@@ -25,6 +25,7 @@ go.work
 *.toml
 /certs
 /env/dev
+/env/test
 /env/dev/resolv.conf
 /env/dev/hostname
 /env/dev/hosts
