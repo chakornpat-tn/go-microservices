@@ -10,12 +10,14 @@ type (
 	}
 
 	authHttpHandler struct {
+		cfg         *config.Config
 		authUsecase authUsecase.AuthUsecaseService
 	}
 )
 
 func NewAuthHttpHandler(cfg *config.Config, authUsecase authUsecase.AuthUsecaseService) AuthHandlerService {
 	return &authHttpHandler{
+		cfg:         cfg,
 		authUsecase: authUsecase,
 	}
 }
