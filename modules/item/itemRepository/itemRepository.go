@@ -1,6 +1,10 @@
 package itemRepository
 
-import "go.mongodb.org/mongo-driver/v2/mongo"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/v2/mongo"
+)
 
 type (
 	ItemRepositoryService interface{}
@@ -14,4 +18,8 @@ func NewItemRepository(db *mongo.Client) ItemRepositoryService {
 	return &itemRepository{
 		db: db,
 	}
+}
+
+func (r *itemRepository) itemDbConn(pctx context.Context) *mongo.Database {
+	return r.db.Database("item_db")
 }
