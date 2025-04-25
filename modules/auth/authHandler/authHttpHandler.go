@@ -1,15 +1,21 @@
 package authHandler
 
-import "github.com/chakornpat-tn/go-microservices/modules/auth/authUsecase"
+import (
+	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/auth/authUsecase"
+)
 
 type (
-	authGrpcHandler struct {
+	AuthHandlerService interface {
+	}
+
+	authHttpHandler struct {
 		authUsecase authUsecase.AuthUsecaseService
 	}
 )
 
-func NewAuthGrpcHandler(authUsecase authUsecase.AuthUsecaseService) authUsecase.AuthUsecaseService {
-	return &authGrpcHandler{
+func NewAuthHttpHandler(cfg *config.Config, authUsecase authUsecase.AuthUsecaseService) AuthHandlerService {
+	return &authHttpHandler{
 		authUsecase: authUsecase,
 	}
 }
