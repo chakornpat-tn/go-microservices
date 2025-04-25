@@ -8,7 +8,7 @@ type (
 	}
 )
 
-func NewAuthGrpcHandler(authUsecase authUsecase.AuthUsecaseService) authUsecase.AuthUsecaseService {
+func NewAuthGrpcHandler(authUsecase authUsecase.AuthUsecaseService) *authGrpcHandler {
 	return &authGrpcHandler{
 		authUsecase: authUsecase,
 	}
