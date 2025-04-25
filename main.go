@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/pkg/database"
 )
 
 func main() {
 	ctx := context.Background()
-	_ = ctx
 
 	//Init Env Config
 	cfg := config.LoadConfig(
@@ -22,5 +22,8 @@ func main() {
 		}(),
 	)
 
-	log.Println(cfg)
+	//Db connection
+	db := database.DbConn(ctx, &cfg)
+	defer db.Disconnect(ctx)
+
 }
