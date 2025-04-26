@@ -7,6 +7,7 @@ import (
 
 	"github.com/chakornpat-tn/go-microservices/config"
 	"github.com/chakornpat-tn/go-microservices/pkg/database"
+	"github.com/chakornpat-tn/go-microservices/server"
 )
 
 func main() {
@@ -25,5 +26,7 @@ func main() {
 	//Db connection
 	db := database.DbConn(ctx, &cfg)
 	defer db.Disconnect(ctx)
+
+	server.Start(ctx, &cfg, db)
 
 }
