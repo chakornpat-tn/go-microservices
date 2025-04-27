@@ -14,7 +14,7 @@ type (
 		AccessToken  string             `json:"access_token" bson:"access_token"`
 		RefreshToken string             `json:"refresh_token" bson:"refresh_token"`
 		CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
-		UpdatedAt    time.Time          `json:"updated_at bson:"updated_at"`
+		UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`
 	}
 
 	Role struct {
