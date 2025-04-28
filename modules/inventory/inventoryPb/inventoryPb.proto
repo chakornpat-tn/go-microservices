@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/chakornpat-tn/go-microservices";
+
+message IsAvailableToSellReq {
+    string playerId = 1;
+    string itemId = 2;
+}
+
+message IsAvailableToSellRes {
+    bool isAvailable = 1;
+}
+
+service InventoryGrpcService {
+    rpc IsAvailableToSell(IsAvailableToSellReq) returns (IsAvailableToSellRes);
+}
