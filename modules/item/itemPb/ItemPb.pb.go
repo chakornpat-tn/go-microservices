@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v6.30.1
-// source: modules/Item/ItemPb/ItemPb.proto
+// source: modules/item/itemPb/itemPb.proto
 
 package go_microservices
 
@@ -30,7 +30,7 @@ type FindItemsInIdsReq struct {
 
 func (x *FindItemsInIdsReq) Reset() {
 	*x = FindItemsInIdsReq{}
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[0]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *FindItemsInIdsReq) String() string {
 func (*FindItemsInIdsReq) ProtoMessage() {}
 
 func (x *FindItemsInIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[0]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *FindItemsInIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindItemsInIdsReq.ProtoReflect.Descriptor instead.
 func (*FindItemsInIdsReq) Descriptor() ([]byte, []int) {
-	return file_modules_Item_ItemPb_ItemPb_proto_rawDescGZIP(), []int{0}
+	return file_modules_item_itemPb_itemPb_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *FindItemsInIdsReq) GetIds() []int32 {
@@ -74,7 +74,7 @@ type FindItemsInIdsRes struct {
 
 func (x *FindItemsInIdsRes) Reset() {
 	*x = FindItemsInIdsRes{}
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[1]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -86,7 +86,7 @@ func (x *FindItemsInIdsRes) String() string {
 func (*FindItemsInIdsRes) ProtoMessage() {}
 
 func (x *FindItemsInIdsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[1]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -99,7 +99,7 @@ func (x *FindItemsInIdsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindItemsInIdsRes.ProtoReflect.Descriptor instead.
 func (*FindItemsInIdsRes) Descriptor() ([]byte, []int) {
-	return file_modules_Item_ItemPb_ItemPb_proto_rawDescGZIP(), []int{1}
+	return file_modules_item_itemPb_itemPb_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *FindItemsInIdsRes) GetItems() []*Item {
@@ -122,7 +122,7 @@ type Item struct {
 
 func (x *Item) Reset() {
 	*x = Item{}
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[2]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -134,7 +134,7 @@ func (x *Item) String() string {
 func (*Item) ProtoMessage() {}
 
 func (x *Item) ProtoReflect() protoreflect.Message {
-	mi := &file_modules_Item_ItemPb_ItemPb_proto_msgTypes[2]
+	mi := &file_modules_item_itemPb_itemPb_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +147,7 @@ func (x *Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Item.ProtoReflect.Descriptor instead.
 func (*Item) Descriptor() ([]byte, []int) {
-	return file_modules_Item_ItemPb_ItemPb_proto_rawDescGZIP(), []int{2}
+	return file_modules_item_itemPb_itemPb_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Item) GetId() string {
@@ -185,11 +185,11 @@ func (x *Item) GetDamage() int32 {
 	return 0
 }
 
-var File_modules_Item_ItemPb_ItemPb_proto protoreflect.FileDescriptor
+var File_modules_item_itemPb_itemPb_proto protoreflect.FileDescriptor
 
-const file_modules_Item_ItemPb_ItemPb_proto_rawDesc = "" +
+const file_modules_item_itemPb_itemPb_proto_rawDesc = "" +
 	"\n" +
-	" modules/Item/ItemPb/ItemPb.proto\"%\n" +
+	" modules/item/itemPb/itemPb.proto\"%\n" +
 	"\x11FindItemsInIdsReq\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\x05R\x03ids\"0\n" +
 	"\x11FindItemsInIdsRes\x12\x1b\n" +
@@ -204,24 +204,24 @@ const file_modules_Item_ItemPb_ItemPb_proto_rawDesc = "" +
 	"\x0eFindItemsInIds\x12\x12.FindItemsInIdsReq\x1a\x12.FindItemsInIdsResB+Z)github.com/chakornpat-tn/go-microservicesb\x06proto3"
 
 var (
-	file_modules_Item_ItemPb_ItemPb_proto_rawDescOnce sync.Once
-	file_modules_Item_ItemPb_ItemPb_proto_rawDescData []byte
+	file_modules_item_itemPb_itemPb_proto_rawDescOnce sync.Once
+	file_modules_item_itemPb_itemPb_proto_rawDescData []byte
 )
 
-func file_modules_Item_ItemPb_ItemPb_proto_rawDescGZIP() []byte {
-	file_modules_Item_ItemPb_ItemPb_proto_rawDescOnce.Do(func() {
-		file_modules_Item_ItemPb_ItemPb_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_modules_Item_ItemPb_ItemPb_proto_rawDesc), len(file_modules_Item_ItemPb_ItemPb_proto_rawDesc)))
+func file_modules_item_itemPb_itemPb_proto_rawDescGZIP() []byte {
+	file_modules_item_itemPb_itemPb_proto_rawDescOnce.Do(func() {
+		file_modules_item_itemPb_itemPb_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_modules_item_itemPb_itemPb_proto_rawDesc), len(file_modules_item_itemPb_itemPb_proto_rawDesc)))
 	})
-	return file_modules_Item_ItemPb_ItemPb_proto_rawDescData
+	return file_modules_item_itemPb_itemPb_proto_rawDescData
 }
 
-var file_modules_Item_ItemPb_ItemPb_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_modules_Item_ItemPb_ItemPb_proto_goTypes = []any{
+var file_modules_item_itemPb_itemPb_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_modules_item_itemPb_itemPb_proto_goTypes = []any{
 	(*FindItemsInIdsReq)(nil), // 0: FindItemsInIdsReq
 	(*FindItemsInIdsRes)(nil), // 1: FindItemsInIdsRes
 	(*Item)(nil),              // 2: Item
 }
-var file_modules_Item_ItemPb_ItemPb_proto_depIdxs = []int32{
+var file_modules_item_itemPb_itemPb_proto_depIdxs = []int32{
 	2, // 0: FindItemsInIdsRes.items:type_name -> Item
 	0, // 1: ItemGrpcService.FindItemsInIds:input_type -> FindItemsInIdsReq
 	1, // 2: ItemGrpcService.FindItemsInIds:output_type -> FindItemsInIdsRes
@@ -232,26 +232,26 @@ var file_modules_Item_ItemPb_ItemPb_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_modules_Item_ItemPb_ItemPb_proto_init() }
-func file_modules_Item_ItemPb_ItemPb_proto_init() {
-	if File_modules_Item_ItemPb_ItemPb_proto != nil {
+func init() { file_modules_item_itemPb_itemPb_proto_init() }
+func file_modules_item_itemPb_itemPb_proto_init() {
+	if File_modules_item_itemPb_itemPb_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_modules_Item_ItemPb_ItemPb_proto_rawDesc), len(file_modules_Item_ItemPb_ItemPb_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_modules_item_itemPb_itemPb_proto_rawDesc), len(file_modules_item_itemPb_itemPb_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_modules_Item_ItemPb_ItemPb_proto_goTypes,
-		DependencyIndexes: file_modules_Item_ItemPb_ItemPb_proto_depIdxs,
-		MessageInfos:      file_modules_Item_ItemPb_ItemPb_proto_msgTypes,
+		GoTypes:           file_modules_item_itemPb_itemPb_proto_goTypes,
+		DependencyIndexes: file_modules_item_itemPb_itemPb_proto_depIdxs,
+		MessageInfos:      file_modules_item_itemPb_itemPb_proto_msgTypes,
 	}.Build()
-	File_modules_Item_ItemPb_ItemPb_proto = out.File
-	file_modules_Item_ItemPb_ItemPb_proto_goTypes = nil
-	file_modules_Item_ItemPb_ItemPb_proto_depIdxs = nil
+	File_modules_item_itemPb_itemPb_proto = out.File
+	file_modules_item_itemPb_itemPb_proto_goTypes = nil
+	file_modules_item_itemPb_itemPb_proto_depIdxs = nil
 }

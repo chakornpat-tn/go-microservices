@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.1
-// source: modules/Item/ItemPb/ItemPb.proto
+// source: modules/item/itemPb/itemPb.proto
 
 package go_microservices
 
@@ -117,5 +117,5 @@ var ItemGrpcService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "modules/Item/ItemPb/ItemPb.proto",
+	Metadata: "modules/item/itemPb/itemPb.proto",
 }

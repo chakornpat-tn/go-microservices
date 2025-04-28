@@ -6,7 +6,7 @@ type (
 	}
 
 	ItemServiceReqDatum struct {
-		ItemId string  `json:"item_id" validate:"required, max=64"`
+		ItemID string  `json:"item_id" validate:"required, max=64"`
 		Price  float64 `json:"price"`
 	}
 )
