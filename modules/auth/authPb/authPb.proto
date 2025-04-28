@@ -1,0 +1,29 @@
+// Version
+syntax = "proto3";
+
+// Package Name
+option go_package = "github.com/chakornpat-tn/go-microservices";
+
+// Structures
+message Empty {}
+
+message CredentialSearchReq {
+    string accessToken = 1;
+}
+
+message CredentialRes {
+    bool isValid = 1;
+}
+
+message RolesCountEmpty {}
+
+message RolesCountReq {}
+message RolesCountRes {
+    int64 count = 1;
+}
+
+// Method
+service AuthGrpcService {
+    rpc CredentialSearch(CredentialSearchReq) returns (CredentialRes);
+    rpc RolesCount(RolesCountReq) returns (RolesCountRes);
+}
