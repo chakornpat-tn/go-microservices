@@ -25,7 +25,7 @@ func InventoryMigrate(pctx context.Context, cfg *config.Config) {
 	})
 	fmt.Println(indexs)
 
-	col = db.Collection("player_inventory_queue")
+	col = db.Collection("players_inventory_queue")
 	result, err := col.InsertOne(pctx, bson.M{"offset": -1}, nil)
 	if err != nil {
 		panic(err)
