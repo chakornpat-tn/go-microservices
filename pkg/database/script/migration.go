@@ -18,8 +18,6 @@ func main() {
 		return os.Args[1]
 	}())
 
-	_ = ctx
-
 	switch cfg.App.Name {
 	case "player":
 		migration.PlayerMigrate(ctx, &cfg)
@@ -28,6 +26,7 @@ func main() {
 	case "item":
 		migration.ItemMigrate(ctx, &cfg)
 	case "inventory":
+		migration.InventoryMigrate(ctx, &cfg)
 	case "payment":
 	}
 }
