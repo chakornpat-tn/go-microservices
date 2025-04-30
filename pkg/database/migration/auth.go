@@ -43,7 +43,7 @@ func AuthMigrate(pctx context.Context, cfg *config.Config) {
 	documents := func() []any {
 		roles := []*auth.Role{
 			{
-				Title: "user",
+				Title: "player",
 				Code:  0,
 			},
 			{
@@ -62,5 +62,5 @@ func AuthMigrate(pctx context.Context, cfg *config.Config) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Migrate auth completed: ", result)
+	log.Println("Migrate auth completed: ", result)
 }
