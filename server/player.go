@@ -17,7 +17,6 @@ func (s *server) playerService() {
 	grpcHandler := playerHandler.NewPlayerGrpcHandler(usecase)
 	queueHandler := playerHandler.NewPlayerQueueHanddler(s.cfg, usecase)
 
-	_ = httpHandler
 	_ = queueHandler
 
 	go func() {
@@ -32,4 +31,5 @@ func (s *server) playerService() {
 	// Health Check
 	player.GET("", s.healthCheckService)
 
+	player.POST("/player/register", httpHandler.CreatePlayer)
 }
