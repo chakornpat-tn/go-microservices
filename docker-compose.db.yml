@@ -11,6 +11,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - auth-data:/data/db
   item-db:
     image: mongo
     container_name: item-db
@@ -19,6 +21,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - item-data:/data/db
 
   player-db:
     image: mongo
@@ -28,6 +32,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - player-data:/data/db
 
   inventory-db:
     image: mongo
@@ -37,6 +43,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - inventory-data:/data/db
 
   payment-db:
     image: mongo
@@ -46,3 +54,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - payment-data:/data/db
+
+volumes:
+  auth-data:
+  item-data:
+  player-data:
+  inventory-data:
+  payment-data:
