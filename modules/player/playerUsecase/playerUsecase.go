@@ -3,6 +3,8 @@ package playerUsecase
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/chakornpat-tn/go-microservices/modules/player"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerRepository"
@@ -12,7 +14,8 @@ import (
 
 type (
 	PlayerUsecaseService interface {
-		CreatePlayer(pctx context.Context, req *player.CreatePlayerReq) (string, error)
+		CreatePlayer(pctx context.Context, req *player.CreatePlayerReq) (*player.PlayerProfile, error)
+		FindOnePlayer(pctx context.Context, playerID string) (*player.PlayerProfile, error)
 	}
 
 	playerUsecase struct {
@@ -26,15 +29,15 @@ func NewPlayerUsecase(playerRepo playerRepository.PlayerRepositoryService) Playe
 	}
 }
 
-func (u *playerUsecase) CreatePlayer(pctx context.Context, req *player.CreatePlayerReq) (string, error) {
+func (u *playerUsecase) CreatePlayer(pctx context.Context, req *player.CreatePlayerReq) (*player.PlayerProfile, error) {
 
 	if !u.playerRepo.IsUniquePlayer(pctx, req.Email, req.Username) {
-		return "", errors.New("erros: email or username already exits")
+		return nil, errors.New("erros: email or username already exits")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", errors.New("error: hash password failed")
+		return nil, errors.New("error: hash password failed")
 	}
 
 	playerID, err := u.playerRepo.InsertOnePlayer(pctx, &player.Player{
@@ -51,8 +54,29 @@ func (u *playerUsecase) CreatePlayer(pctx context.Context, req *player.CreatePla
 		},
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return playerID.Hex(), nil
+	return u.FindOnePlayer(pctx, playerID.Hex())
+}
+
+func (u *playerUsecase) FindOnePlayer(pctx context.Context, playerID string) (*player.PlayerProfile, error) {
+	result, err := u.playerRepo.FindOnePlayer(pctx, playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		fmt.Print("Error loading location")
+		return nil, err
+	}
+
+	return &player.PlayerProfile{
+		ID:        result.ID.Hex(),
+		Username:  result.Username,
+		Email:     result.Email,
+		CreatedAt: result.CreatedAt.In(loc),
+		UpdatedAt: result.UpdatedAt.In(loc),
+	}, nil
 }
