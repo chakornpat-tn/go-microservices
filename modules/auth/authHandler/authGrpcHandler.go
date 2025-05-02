@@ -1,9 +1,15 @@
 package authHandler
 
-import "github.com/chakornpat-tn/go-microservices/modules/auth/authUsecase"
+import (
+	"context"
+
+	authPb "github.com/chakornpat-tn/go-microservices/modules/auth/authPb"
+	"github.com/chakornpat-tn/go-microservices/modules/auth/authUsecase"
+)
 
 type (
 	authGrpcHandler struct {
+		authPb.UnimplementedAuthGrpcServiceServer
 		authUsecase authUsecase.AuthUsecaseService
 	}
 )
@@ -12,4 +18,12 @@ func NewAuthGrpcHandler(authUsecase authUsecase.AuthUsecaseService) *authGrpcHan
 	return &authGrpcHandler{
 		authUsecase: authUsecase,
 	}
+}
+
+func (g *authGrpcHandler) CredentialSearch(ctx context.Context, req *authPb.CredentialSearchReq) (*authPb.CredentialRes, error) {
+	return nil, nil
+}
+
+func (g *authGrpcHandler) RolesCount(ctx context.Context, req *authPb.RolesCountReq) (*authPb.RolesCountRes, error) {
+	return nil, nil
 }

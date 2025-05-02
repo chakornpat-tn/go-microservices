@@ -8,7 +8,7 @@ import (
 type (
 	UpdateInventoryReq struct {
 		PlayerID string `json:"player_id" validate:"required, max=64"`
-		ItemId   string `json:"item_id" validate:"required, max=64"`
+		ItemID   string `json:"item_id" validate:"required, max=64"`
 	}
 
 	ItemInInventory struct {

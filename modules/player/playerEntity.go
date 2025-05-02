@@ -23,7 +23,7 @@ type (
 	}
 
 	PlayerProfileBson struct {
-		Id        primitive.ObjectID `json:"_id" bson:"_id"`
+		ID        primitive.ObjectID `json:"_id" bson:"_id"`
 		Email     string             `json:"email" bson:"email"`
 		Username  string             `json:"username" bson:"username"`
 		CreatedAt time.Time          `json:"created_at" bson:"created_at"`

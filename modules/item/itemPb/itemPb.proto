@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/chakornpat-tn/go-microservices";
+
+message FindItemsInIdsReq {
+    repeated int32 ids = 1;
+}
+
+message FindItemsInIdsRes {
+    repeated Item items = 1;
+}
+
+message Item {
+    string id = 1;
+    string title = 2;
+    double price = 3;
+    string imgUrl = 4;
+    int32 damage = 5;
+}
+
+service ItemGrpcService {
+    rpc FindItemsInIds(FindItemsInIdsReq) returns (FindItemsInIdsRes);
+    
+}
