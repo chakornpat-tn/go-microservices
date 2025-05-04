@@ -7,11 +7,11 @@ option go_package = "github.com/chakornpat-tn/go-microservices";
 // Structures
 message Empty {}
 
-message CredentialSearchReq {
+message AccessTokenSearchReq {
     string accessToken = 1;
 }
 
-message CredentialRes {
+message AccessTokenRes {
     bool isValid = 1;
 }
 
@@ -24,6 +24,6 @@ message RolesCountRes {
 
 // Method
 service AuthGrpcService {
-    rpc CredentialSearch(CredentialSearchReq) returns (CredentialRes);
+    rpc AccessTokenSearch(AccessTokenSearchReq) returns (AccessTokenRes);
     rpc RolesCount(RolesCountReq) returns (RolesCountRes);
 }

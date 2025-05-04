@@ -1,9 +1,13 @@
 package server
 
 import (
+	"log"
+
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerHandler"
+	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerRepository"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerUsecase"
+	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
 )
 
 func (s *server) playerService() {
@@ -14,8 +18,14 @@ func (s *server) playerService() {
 	queueHandler := playerHandler.NewPlayerQueueHanddler(s.cfg, usecase)
 
 	_ = httpHandler
-	_ = grpcHandler
 	_ = queueHandler
+
+	go func() {
+		grpcServer, lis := grpccon.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.PlayerUrl)
+		playerPb.RegisterPlayerGrpcServiceServer(grpcServer, grpcHandler)
+		log.Printf("Player gRPC server listening on %s", s.cfg.Grpc.PlayerUrl)
+		grpcServer.Serve(lis)
+	}()
 
 	player := s.app.Group("/player_v1")
 

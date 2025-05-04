@@ -21,8 +21,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthGrpcService_CredentialSearch_FullMethodName = "/AuthGrpcService/CredentialSearch"
-	AuthGrpcService_RolesCount_FullMethodName       = "/AuthGrpcService/RolesCount"
+	AuthGrpcService_AccessTokenSearch_FullMethodName = "/AuthGrpcService/AccessTokenSearch"
+	AuthGrpcService_RolesCount_FullMethodName        = "/AuthGrpcService/RolesCount"
 )
 
 // AuthGrpcServiceClient is the client API for AuthGrpcService service.
@@ -31,7 +31,7 @@ const (
 //
 // Method
 type AuthGrpcServiceClient interface {
-	CredentialSearch(ctx context.Context, in *CredentialSearchReq, opts ...grpc.CallOption) (*CredentialRes, error)
+	AccessTokenSearch(ctx context.Context, in *AccessTokenSearchReq, opts ...grpc.CallOption) (*AccessTokenRes, error)
 	RolesCount(ctx context.Context, in *RolesCountReq, opts ...grpc.CallOption) (*RolesCountRes, error)
 }
 
@@ -43,10 +43,10 @@ func NewAuthGrpcServiceClient(cc grpc.ClientConnInterface) AuthGrpcServiceClient
 	return &authGrpcServiceClient{cc}
 }
 
-func (c *authGrpcServiceClient) CredentialSearch(ctx context.Context, in *CredentialSearchReq, opts ...grpc.CallOption) (*CredentialRes, error) {
+func (c *authGrpcServiceClient) AccessTokenSearch(ctx context.Context, in *AccessTokenSearchReq, opts ...grpc.CallOption) (*AccessTokenRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CredentialRes)
-	err := c.cc.Invoke(ctx, AuthGrpcService_CredentialSearch_FullMethodName, in, out, cOpts...)
+	out := new(AccessTokenRes)
+	err := c.cc.Invoke(ctx, AuthGrpcService_AccessTokenSearch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *authGrpcServiceClient) RolesCount(ctx context.Context, in *RolesCountRe
 //
 // Method
 type AuthGrpcServiceServer interface {
-	CredentialSearch(context.Context, *CredentialSearchReq) (*CredentialRes, error)
+	AccessTokenSearch(context.Context, *AccessTokenSearchReq) (*AccessTokenRes, error)
 	RolesCount(context.Context, *RolesCountReq) (*RolesCountRes, error)
 	mustEmbedUnimplementedAuthGrpcServiceServer()
 }
@@ -81,8 +81,8 @@ type AuthGrpcServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthGrpcServiceServer struct{}
 
-func (UnimplementedAuthGrpcServiceServer) CredentialSearch(context.Context, *CredentialSearchReq) (*CredentialRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CredentialSearch not implemented")
+func (UnimplementedAuthGrpcServiceServer) AccessTokenSearch(context.Context, *AccessTokenSearchReq) (*AccessTokenRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccessTokenSearch not implemented")
 }
 func (UnimplementedAuthGrpcServiceServer) RolesCount(context.Context, *RolesCountReq) (*RolesCountRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RolesCount not implemented")
@@ -108,20 +108,20 @@ func RegisterAuthGrpcServiceServer(s grpc.ServiceRegistrar, srv AuthGrpcServiceS
 	s.RegisterService(&AuthGrpcService_ServiceDesc, srv)
 }
 
-func _AuthGrpcService_CredentialSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CredentialSearchReq)
+func _AuthGrpcService_AccessTokenSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AccessTokenSearchReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthGrpcServiceServer).CredentialSearch(ctx, in)
+		return srv.(AuthGrpcServiceServer).AccessTokenSearch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthGrpcService_CredentialSearch_FullMethodName,
+		FullMethod: AuthGrpcService_AccessTokenSearch_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthGrpcServiceServer).CredentialSearch(ctx, req.(*CredentialSearchReq))
+		return srv.(AuthGrpcServiceServer).AccessTokenSearch(ctx, req.(*AccessTokenSearchReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -152,8 +152,8 @@ var AuthGrpcService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthGrpcServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CredentialSearch",
-			Handler:    _AuthGrpcService_CredentialSearch_Handler,
+			MethodName: "AccessTokenSearch",
+			Handler:    _AuthGrpcService_AccessTokenSearch_Handler,
 		},
 		{
 			MethodName: "RolesCount",
