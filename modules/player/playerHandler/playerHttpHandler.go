@@ -18,6 +18,7 @@ type (
 		CreatePlayer(c echo.Context) error
 		FindOnePlayer(c echo.Context) error
 		AddPlayerMoney(c echo.Context) error
+		GetPlayerSavingAccount(c echo.Context) error
 	}
 
 	playerHttpHandler struct {
@@ -72,10 +73,23 @@ func (h *playerHttpHandler) AddPlayerMoney(c echo.Context) error {
 	if err := wrapper.Bind(req); err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
-
-	if err := h.playerUsecase.AddPlayerMonney(ctx, req); err != nil {
+	result, err := h.playerUsecase.AddPlayerMonney(ctx, req)
+	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	return response.SuccessResponse(c, http.StatusOK, map[string]any{"message": "successful"})
+	return response.SuccessResponse(c, http.StatusOK, result)
+}
+
+func (h *playerHttpHandler) GetPlayerSavingAccount(c echo.Context) error {
+	ctx := context.Background()
+	playerID := c.Param("playerID")
+
+	result, err := h.playerUsecase.GetPlayerSavingAccount(ctx, playerID)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, result)
+
 }
