@@ -1,12 +1,21 @@
 package playerHandler
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/player"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerUsecase"
+	"github.com/chakornpat-tn/go-microservices/pkg/request"
+	"github.com/chakornpat-tn/go-microservices/pkg/response"
+	"github.com/labstack/echo/v4"
 )
 
 type (
-	PlayerHttpHandlerService interface{}
+	PlayerHttpHandlerService interface {
+		CreatePlayer(c echo.Context) error
+	}
 
 	playerHttpHandler struct {
 		cfg           *config.Config
@@ -19,4 +28,22 @@ func NewPlayerHttpHanddler(cfg *config.Config, playerUsecase playerUsecase.Playe
 		cfg:           cfg,
 		playerUsecase: playerUsecase,
 	}
+}
+
+func (h *playerHttpHandler) CreatePlayer(c echo.Context) error {
+	ctx := context.Background()
+
+	wrapper := request.ContextWrapper(c)
+
+	req := new(player.CreatePlayerReq)
+	if err := wrapper.Bind(req); err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.playerUsecase.CreatePlayer(ctx, req)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, res)
 }
