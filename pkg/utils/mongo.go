@@ -4,11 +4,14 @@ import (
 	"log"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func ConvToObj(id string) primitive.ObjectID {
-	objectID, _ := primitive.ObjectIDFromHex(id)
+func ConvToObjID(id string) bson.ObjectID {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Error: ConvToObjID: %s", err.Error())
+	}
 	return objectID
 }
 
