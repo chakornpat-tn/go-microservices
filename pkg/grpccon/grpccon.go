@@ -1,7 +1,6 @@
 package grpccon
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net"
@@ -18,6 +17,9 @@ import (
 
 type (
 	GrpcClientFactoryHandler interface {
+		Auth() authPb.AuthGrpcServiceClient
+		Player() playerPb.PlayerGrpcServiceClient
+		Item() itemPb.ItemGrpcServiceClient
 	}
 
 	GrpcClientFactory struct {
@@ -43,7 +45,7 @@ func (g *GrpcClientFactory) Player() playerPb.PlayerGrpcServiceClient {
 	return playerPb.NewPlayerGrpcServiceClient(g.client)
 }
 
-func NewGrpccClient(ctx context.Context, host string) (GrpcClientFactoryHandler, error) {
+func NewGrpccClient(host string) (GrpcClientFactoryHandler, error) {
 	opts := make([]grpc.DialOption, 0)
 
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
