@@ -71,8 +71,8 @@ func LoadConfig(path string) Config {
 			Url: os.Getenv("DB_URL"),
 		},
 		Jwt: Jwt{
-			AccessTokenSecretKey:  os.Getenv("JWT_ACCESS_TOKEN_SECRET_KEY"),
-			RefreshTokenSecretKey: os.Getenv("JWT_REFRESH_TOKEN_SECRET_KEY"),
+			AccessTokenSecretKey:  os.Getenv("JWT_ACCESS_SECRET_KEY"),
+			RefreshTokenSecretKey: os.Getenv("JWT_REFRESH_SECRET_KEY"),
 			ApiSecretKey:          os.Getenv("JWT_API_SECRET_KEY"),
 			AccessDuration: func() int64 {
 				result, err := strconv.ParseInt(os.Getenv("JWT_ACCESS_DURATION"), 10, 64)

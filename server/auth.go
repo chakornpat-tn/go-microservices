@@ -24,11 +24,10 @@ func (s *server) authService() {
 		grpcServer.Serve(lis)
 	}()
 
-	_ = httpHandler
-
 	auth := s.app.Group("/auth_v1")
 
 	// Health Check
 	auth.GET("", s.healthCheckService)
+	auth.POST("/login", httpHandler.Login)
 
 }
