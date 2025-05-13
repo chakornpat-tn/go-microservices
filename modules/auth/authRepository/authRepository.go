@@ -6,13 +6,18 @@ import (
 	"log"
 	"time"
 
+	"github.com/chakornpat-tn/go-microservices/modules/auth"
 	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
 	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type (
-	AuthRepositoryService interface{}
+	AuthRepositoryService interface {
+		CredentialSearch(pctx context.Context, grpcUrl string, req *playerPb.CredentialSearchReq) (*playerPb.PlayerProfile, error)
+		InsertOnePlayerCredential(pctx context.Context, req *auth.Credential) (bson.ObjectID, error)
+	}
 
 	authRepository struct {
 		db *mongo.Client
@@ -46,4 +51,20 @@ func (r *authRepository) CredentialSearch(pctx context.Context, grpcUrl string, 
 	}
 
 	return result, nil
+}
+
+func (r *authRepository) InsertOnePlayerCredential(pctx context.Context, req *auth.Credential) (bson.ObjectID, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.authDbConn(ctx)
+	col := db.Collection("auth")
+
+	result, err := col.InsertOne(ctx, req)
+	if err != nil {
+		log.Printf("Error: InsertOnePlayerCredential failed: %s", err.Error())
+		return bson.NilObjectID, errors.New("error: InsertOnePlayerCredential failed")
+	}
+
+	return result.InsertedID.(bson.ObjectID), nil
 }
