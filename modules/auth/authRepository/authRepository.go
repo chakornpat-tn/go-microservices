@@ -9,6 +9,7 @@ import (
 	"github.com/chakornpat-tn/go-microservices/modules/auth"
 	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
 	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
+	"github.com/chakornpat-tn/go-microservices/pkg/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -17,6 +18,7 @@ type (
 	AuthRepositoryService interface {
 		CredentialSearch(pctx context.Context, grpcUrl string, req *playerPb.CredentialSearchReq) (*playerPb.PlayerProfile, error)
 		InsertOnePlayerCredential(pctx context.Context, req *auth.Credential) (bson.ObjectID, error)
+		FindOnePlayerCredential(pctx context.Context, credentialId string) (*auth.Credential, error)
 	}
 
 	authRepository struct {
@@ -67,4 +69,23 @@ func (r *authRepository) InsertOnePlayerCredential(pctx context.Context, req *au
 	}
 
 	return result.InsertedID.(bson.ObjectID), nil
+}
+
+func (r *authRepository) FindOnePlayerCredential(pctx context.Context, credentialId string) (*auth.Credential, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.authDbConn(ctx)
+	col := db.Collection("auth")
+
+	var result auth.Credential
+	err := col.FindOne(ctx, bson.M{
+		"_id": utils.ConvToObjID(credentialId),
+	}).Decode(&result)
+	if err != nil {
+		log.Printf("Error: FindOnePlayerCredential failed: %s", err.Error())
+		return nil, errors.New("error: FindOnePlayerCredential failed")
+	}
+
+	return &result, nil
 }
