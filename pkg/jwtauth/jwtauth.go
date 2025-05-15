@@ -1,11 +1,14 @@
 package jwtauth
 
 import (
+	"context"
 	"errors"
 	"math"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc/metadata"
 )
 
 type (
@@ -115,12 +118,12 @@ func ReloadToken(secret string, expiredAt int64, claims *Claims) string {
 	return obj.SignToken()
 }
 
-func NewApiKey(secret string, claims *Claims) AuthFactory {
+func NewApiKey(secret string) AuthFactory {
 	return &apiKey{
 		authConcrete: &authConcrete{
 			Secret: []byte(secret),
 			Claims: &AuthMapClaims{
-				Claims: claims,
+				Claims: &Claims{},
 				RegisteredClaims: jwt.RegisteredClaims{
 					Issuer:    "go-microservices",
 					Subject:   "api-key",
@@ -155,4 +158,18 @@ func ParseToken(secret string, tokenString string) (*AuthMapClaims, error) {
 	} else {
 		return nil, errors.New("error: claims type is invalid")
 	}
+}
+
+// API Key Generator
+var apiKeyInstanct string
+var once sync.Once
+
+func SetApiKey(secret string) {
+	once.Do(func() {
+		apiKeyInstanct = NewApiKey(secret).SignToken()
+	})
+}
+
+func SetApiKeyInContext(pctx *context.Context) {
+	*pctx = metadata.NewOutgoingContext(*pctx, metadata.Pairs("auth", apiKeyInstanct))
 }
