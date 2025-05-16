@@ -17,7 +17,7 @@ type (
 	}
 
 	Claims struct {
-		Id       string `json:"id"`
+		PlayerID string `json:"player_id"`
 		RoleCode int    `json:"role_code"`
 	}
 
@@ -46,7 +46,7 @@ func now() time.Time {
 }
 
 func (a *authConcrete) SignToken() string {
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, a.Claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, a.Claims)
 	ss, _ := token.SignedString(a.Secret)
 	return ss
 }

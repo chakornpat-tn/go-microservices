@@ -10,6 +10,7 @@ import (
 	"github.com/chakornpat-tn/go-microservices/pkg/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func playerDbConn(pctx context.Context, cfg *config.Config) *mongo.Database {
@@ -37,8 +38,11 @@ func PlayerMigrate(pctx context.Context, cfg *config.Config) {
 	documents := func() []any {
 		roles := []*player.Player{
 			{
-				Email:    "player001@email.com",
-				Password: "123456",
+				Email: "player001@email.com",
+				Password: func() string {
+					hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+					return string(hashedPassword)
+				}(),
 				Username: "Player001",
 				PlayerRoles: []player.PlayerRole{
 					{
@@ -50,8 +54,11 @@ func PlayerMigrate(pctx context.Context, cfg *config.Config) {
 				UpdatedAt: utils.LocalTime(),
 			},
 			{
-				Email:    "player002@email.com",
-				Password: "123456",
+				Email: "player002@email.com",
+				Password: func() string {
+					hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+					return string(hashedPassword)
+				}(),
 				Username: "Player002",
 				PlayerRoles: []player.PlayerRole{
 					{
@@ -63,8 +70,11 @@ func PlayerMigrate(pctx context.Context, cfg *config.Config) {
 				UpdatedAt: utils.LocalTime(),
 			},
 			{
-				Email:    "admin001@email.com",
-				Password: "123456",
+				Email: "admin001@email.com",
+				Password: func() string {
+					hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+					return string(hashedPassword)
+				}(),
 				Username: "Admin001",
 				PlayerRoles: []player.PlayerRole{
 					{
