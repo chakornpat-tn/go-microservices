@@ -58,6 +58,11 @@ func (u *authUsecase) Login(pctx context.Context, cfg *config.Config, req *auth.
 		UpdatedAt:    utils.LocalTime(),
 	})
 
+	credential, err := u.authRepo.FindOnePlayerCredential(pctx, credentialID.Hex())
+	if err != nil {
+		return nil, err
+	}
+
 	loc, _ := time.LoadLocation("Asia/Bangkok")
 
 	return &auth.ProfileIntercepter{
@@ -69,7 +74,13 @@ func (u *authUsecase) Login(pctx context.Context, cfg *config.Config, req *auth.
 			UpdatedAt: utils.ConvertStringTimeToTime(profile.UpdatedAt).In(loc),
 		},
 		Credential: &auth.CredentialRes{
-			ID: credentialID.Hex(),
+			ID:           credential.ID.Hex(),
+			PlayerID:     credential.PlayerID,
+			RoleCode:     credential.RoleCode,
+			AccessToken:  credential.AccessToken,
+			RefreshToken: credential.RefreshToken,
+			CreatedAt:    credential.CreatedAt.In(loc),
+			UpdatedAt:    credential.UpdatedAt.In(loc),
 		},
 	}, nil
 }
