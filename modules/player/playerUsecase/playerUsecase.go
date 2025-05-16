@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/chakornpat-tn/go-microservices/modules/player"
+	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerRepository"
 	"github.com/chakornpat-tn/go-microservices/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -18,6 +20,7 @@ type (
 		FindOnePlayer(pctx context.Context, playerID string) (*player.PlayerProfile, error)
 		AddPlayerMonney(pctx context.Context, req *player.CreatePlayerTransactionReq) (*player.PlayerSavingAccount, error)
 		GetPlayerSavingAccount(pctx context.Context, playerId string) (*player.PlayerSavingAccount, error)
+		FindOnePlayerCredential(pctx context.Context, email, password string) (*playerPb.PlayerProfile, error)
 	}
 
 	playerUsecase struct {
@@ -97,4 +100,26 @@ func (u *playerUsecase) AddPlayerMonney(pctx context.Context, req *player.Create
 
 func (u *playerUsecase) GetPlayerSavingAccount(pctx context.Context, playerId string) (*player.PlayerSavingAccount, error) {
 	return u.playerRepo.GetPlayerSavingAccount(pctx, playerId)
+}
+
+func (u *playerUsecase) FindOnePlayerCredential(pctx context.Context, email, password string) (*playerPb.PlayerProfile, error) {
+	result, err := u.playerRepo.FindOnePlayerCredential(pctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(password), []byte(result.Password)); err != nil {
+		log.Printf("Error: FindOnePlayerCredential: %s", err.Error())
+		return nil, errors.New("error: email or password is invalid")
+	}
+
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+
+	return &playerPb.PlayerProfile{
+		Id:        result.ID.Hex(),
+		Username:  result.Username,
+		Email:     result.Email,
+		CreatedAt: result.CreatedAt.In(loc).String(),
+		UpdatedAt: result.UpdatedAt.In(loc).String(),
+	}, nil
 }

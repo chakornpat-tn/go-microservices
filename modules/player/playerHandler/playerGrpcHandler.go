@@ -21,7 +21,11 @@ func NewPlayerGrpcHandler(playerUsecase playerUsecase.PlayerUsecaseService) *pla
 }
 
 func (g *playerGrpcHandler) CredentialSearch(ctx context.Context, req *playerPb.CredentialSearchReq) (*playerPb.PlayerProfile, error) {
-	return nil, nil
+	result, err := g.playerUsecase.FindOnePlayerCredential(ctx, req.Email, req.Password)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (g *playerGrpcHandler) FindOnePlayerProfileToRefresh(ctx context.Context, req *playerPb.FindOnePlayerProfileToRefreshReq) (*playerPb.PlayerProfile, error) {
