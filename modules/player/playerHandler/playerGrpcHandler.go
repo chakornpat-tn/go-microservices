@@ -29,7 +29,11 @@ func (g *playerGrpcHandler) CredentialSearch(ctx context.Context, req *playerPb.
 }
 
 func (g *playerGrpcHandler) FindOnePlayerProfileToRefresh(ctx context.Context, req *playerPb.FindOnePlayerProfileToRefreshReq) (*playerPb.PlayerProfile, error) {
-	return nil, nil
+	result, err := g.playerUsecase.FindOnePlayerProfileToRefresh(ctx, req.PlayerId)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (g *playerGrpcHandler) GetPlayerSavingAccount(ctx context.Context, req *playerPb.GetPlayerSavingAccountReq) (*playerPb.GetPlayerSavingAccountRes, error) {
