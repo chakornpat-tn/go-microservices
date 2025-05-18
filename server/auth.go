@@ -29,5 +29,6 @@ func (s *server) authService() {
 	// Health Check
 	auth.GET("", s.healthCheckService)
 	auth.POST("/login", httpHandler.Login)
+	auth.POST("/refresh-token", httpHandler.RefreshToken)
 
 }
