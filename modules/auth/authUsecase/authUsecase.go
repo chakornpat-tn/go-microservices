@@ -9,6 +9,7 @@ import (
 
 	"github.com/chakornpat-tn/go-microservices/config"
 	"github.com/chakornpat-tn/go-microservices/modules/auth"
+	authPb "github.com/chakornpat-tn/go-microservices/modules/auth/authPb"
 	"github.com/chakornpat-tn/go-microservices/modules/auth/authRepository"
 	"github.com/chakornpat-tn/go-microservices/modules/player"
 	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
@@ -21,6 +22,7 @@ type (
 		Login(pctx context.Context, cfg *config.Config, req *auth.PlayerLoginReq) (*auth.ProfileIntercepter, error)
 		RefreshToken(pctx context.Context, cfg *config.Config, req *auth.RefreshTokenReq) (*auth.ProfileIntercepter, error)
 		Logout(pctx context.Context, credentialID string) (int64, error)
+		AccessTokenSearch(pctx context.Context, accessToken string) (*authPb.AccessTokenRes, error)
 	}
 
 	authUsecase struct {
@@ -152,4 +154,23 @@ func (u *authUsecase) RefreshToken(pctx context.Context, cfg *config.Config, req
 
 func (u *authUsecase) Logout(pctx context.Context, credentialID string) (int64, error) {
 	return u.authRepo.DeleteOnePlayerCredential(pctx, credentialID)
+}
+
+func (u *authUsecase) AccessTokenSearch(pctx context.Context, accessToken string) (*authPb.AccessTokenRes, error) {
+	credential, err := u.authRepo.FindOnePlayerCredential(pctx, accessToken)
+	if err != nil {
+		return &authPb.AccessTokenRes{
+			IsValid: false,
+		}, err
+	}
+
+	if credential == nil {
+		return &authPb.AccessTokenRes{
+			IsValid: false,
+		}, errors.New("error:access token is invalid")
+	}
+
+	return &authPb.AccessTokenRes{
+		IsValid: true,
+	}, nil
 }
