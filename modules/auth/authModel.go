@@ -43,4 +43,8 @@ type (
 		RefreshToken string    `bson:"refresh_token"`
 		UpdatedAt    time.Time `bson:"updated_at"`
 	}
+
+	LogoutReq struct {
+		CredentialId string `json:"credential_id" form:"credential_id" validate:"required,max=64"`
+	}
 )
