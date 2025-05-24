@@ -157,7 +157,7 @@ func (u *authUsecase) Logout(pctx context.Context, credentialID string) (int64, 
 }
 
 func (u *authUsecase) AccessTokenSearch(pctx context.Context, accessToken string) (*authPb.AccessTokenRes, error) {
-	credential, err := u.authRepo.FindOnePlayerCredential(pctx, accessToken)
+	credential, err := u.authRepo.FindOneAccessToken(pctx, accessToken)
 	if err != nil {
 		return &authPb.AccessTokenRes{
 			IsValid: false,
