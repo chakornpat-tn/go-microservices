@@ -72,8 +72,8 @@ func (r *middlewareRepository) RolesCount(pctx context.Context, grpcUrl string) 
 	}
 
 	if result == nil {
-		log.Printf("Error: RolesCount invalid response")
-		return -1, errors.New("error: roles count invalid")
+		log.Printf("Error: RolesCount failed")
+		return -1, errors.New("error: roles count failed")
 	}
 
 	return result.Count, nil
