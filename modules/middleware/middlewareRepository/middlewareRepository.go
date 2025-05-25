@@ -13,6 +13,7 @@ import (
 type (
 	MiddlewareRepositoryService interface {
 		AccessTokenSearch(pctx context.Context, grpcUrl, accessToken string) error
+		RolesCount(pctx context.Context, grpcUrl string) (int64, error)
 	}
 
 	middlewareRepository struct{}
@@ -51,4 +52,29 @@ func (r *middlewareRepository) AccessTokenSearch(pctx context.Context, grpcUrl, 
 	}
 
 	return nil
+}
+
+func (r *middlewareRepository) RolesCount(pctx context.Context, grpcUrl string) (int64, error) {
+	ctx, cancel := context.WithTimeout(pctx, 5*time.Second)
+	defer cancel()
+
+	conn, err := grpccon.NewGrpccClient(grpcUrl)
+	if err != nil {
+		log.Printf("Error: gPRC connection failed: %s", err.Error())
+		return -1, errors.New("gPRC connection failed")
+	}
+
+	result, err := conn.Auth().RolesCount(ctx, &authPb.RolesCountReq{})
+
+	if err != nil {
+		log.Printf("Error: RolesCount failed: %s", err.Error())
+		return -1, errors.New("error: roles count failed")
+	}
+
+	if result == nil {
+		log.Printf("Error: RolesCount failed")
+		return -1, errors.New("error: roles count failed")
+	}
+
+	return result.Count, nil
 }

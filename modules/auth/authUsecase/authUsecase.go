@@ -23,6 +23,7 @@ type (
 		RefreshToken(pctx context.Context, cfg *config.Config, req *auth.RefreshTokenReq) (*auth.ProfileIntercepter, error)
 		Logout(pctx context.Context, credentialID string) (int64, error)
 		AccessTokenSearch(pctx context.Context, accessToken string) (*authPb.AccessTokenRes, error)
+		RolesCount(pctx context.Context) (*authPb.RolesCountRes, error)
 	}
 
 	authUsecase struct {
@@ -172,5 +173,16 @@ func (u *authUsecase) AccessTokenSearch(pctx context.Context, accessToken string
 
 	return &authPb.AccessTokenRes{
 		IsValid: true,
+	}, nil
+}
+
+func (u *authUsecase) RolesCount(pctx context.Context) (*authPb.RolesCountRes, error) {
+	result, err := u.authRepo.RolesCount(pctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authPb.RolesCountRes{
+		Count: result,
 	}, nil
 }
