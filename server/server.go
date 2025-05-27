@@ -13,6 +13,7 @@ import (
 	"github.com/chakornpat-tn/go-microservices/modules/middleware/middlewareHandler"
 	"github.com/chakornpat-tn/go-microservices/modules/middleware/middlewareRepository"
 	"github.com/chakornpat-tn/go-microservices/modules/middleware/middlewareUsecase"
+	"github.com/chakornpat-tn/go-microservices/pkg/jwtauth"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -61,6 +62,8 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 		cfg:        cfg,
 		middleware: newMiddleware(cfg),
 	}
+
+	jwtauth.SetApiKey(cfg.Jwt.ApiSecretKey)
 
 	// Basic Middleware
 	// Request Timeout
