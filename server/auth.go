@@ -27,7 +27,7 @@ func (s *server) authService() {
 	auth := s.app.Group("/auth_v1")
 
 	// Health Check
-	auth.GET("", s.middleware.JwtAuthorization(s.middleware.RbacAuthorization(s.healthCheckService, []int{1, 0})))
+	auth.GET("", s.healthCheckService)
 	auth.POST("/login", httpHandler.Login)
 	auth.POST("/logout", httpHandler.Logout)
 	auth.POST("/refresh-token", httpHandler.RefreshToken)

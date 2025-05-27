@@ -2,6 +2,7 @@ package middlewareUsecase
 
 import (
 	"errors"
+	"log"
 
 	"github.com/chakornpat-tn/go-microservices/config"
 	"github.com/chakornpat-tn/go-microservices/modules/middleware/middlewareRepository"
@@ -14,6 +15,7 @@ type (
 	MiddlewareUsecaseService interface {
 		JwtAuthorization(c echo.Context, cfg *config.Config, accessToken string) (echo.Context, error)
 		RbacAuthorization(c echo.Context, cfg *config.Config, expected []int) (echo.Context, error)
+		PlayerIDParamValidation(c echo.Context) (echo.Context, error)
 	}
 
 	middlewareUsecase struct {
@@ -65,4 +67,21 @@ func (u *middlewareUsecase) RbacAuthorization(c echo.Context, cfg *config.Config
 	}
 
 	return nil, errors.New("error: permission denied")
+}
+
+func (u *middlewareUsecase) PlayerIDParamValidation(c echo.Context) (echo.Context, error) {
+	playerID := c.Param("player_id")
+	playerIDToken := c.Get("player_id").(string)
+
+	if playerID == "" {
+		log.Println("Error: Player ID not found ")
+		return nil, errors.New("error: player ID is required")
+	}
+
+	if playerID != playerIDToken {
+		log.Printf("Error: Player ID does not match: %s != %s", playerID, playerIDToken)
+		return nil, errors.New("error: player ID does not match")
+	}
+
+	return c, nil
 }
