@@ -8,6 +8,7 @@ import (
 
 	authPb "github.com/chakornpat-tn/go-microservices/modules/auth/authPb"
 	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
+	"github.com/chakornpat-tn/go-microservices/pkg/jwtauth"
 )
 
 type (
@@ -32,6 +33,8 @@ func (r *middlewareRepository) AccessTokenSearch(pctx context.Context, grpcUrl, 
 		log.Printf("Error: gPRC connection failed: %s", err.Error())
 		return errors.New("gPRC connection failed")
 	}
+
+	jwtauth.SetApiKeyInContext(&ctx)
 
 	result, err := conn.Auth().AccessTokenSearch(ctx, &authPb.AccessTokenSearchReq{
 		AccessToken: accessToken,
@@ -63,6 +66,8 @@ func (r *middlewareRepository) RolesCount(pctx context.Context, grpcUrl string) 
 		log.Printf("Error: gPRC connection failed: %s", err.Error())
 		return -1, errors.New("gPRC connection failed")
 	}
+
+	jwtauth.SetApiKeyInContext(&ctx)
 
 	result, err := conn.Auth().RolesCount(ctx, &authPb.RolesCountReq{})
 
