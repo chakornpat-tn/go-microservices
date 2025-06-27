@@ -32,7 +32,7 @@ func (s *server) playerService() {
 	player.GET("", s.healthCheckService)
 
 	player.POST("/player/register", httpHandler.CreatePlayer)
+	player.POST("/player/add-money", httpHandler.AddPlayerMoney, s.middleware.JwtAuthorization)
 	player.GET("/player/:playerID", httpHandler.FindOnePlayer)
-	player.GET("/player/account/:playerID", httpHandler.GetPlayerSavingAccount)
-	player.POST("/player/add-money", httpHandler.AddPlayerMoney)
+	player.GET("/player/saving-account/my-account", httpHandler.GetPlayerSavingAccount, s.middleware.JwtAuthorization)
 }
