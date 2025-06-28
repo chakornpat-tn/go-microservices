@@ -11,7 +11,8 @@ import (
 
 type (
 	ItemUsecaseService interface {
-		CreateItem(pctx context.Context, req *item.CreateItemReq) (any, error)
+		CreateItem(pctx context.Context, req *item.CreateItemReq) (*item.ItemShowCase, error)
+		FindOneItem(pcxt context.Context, itemID string) (*item.ItemShowCase, error)
 	}
 
 	itemUsecase struct {
@@ -25,9 +26,9 @@ func NewItemUsecase(itemRepo itemRepository.ItemRepositoryService) ItemUsecaseSe
 	}
 }
 
-func (u *itemUsecase) CreateItem(pctx context.Context, req *item.CreateItemReq) (any, error) {
+func (u *itemUsecase) CreateItem(pctx context.Context, req *item.CreateItemReq) (*item.ItemShowCase, error) {
 	if !u.itemRepo.IsUniqueItem(pctx, req.Title) {
-		return "", errors.New("error: item title already exists")
+		return nil, errors.New("error: item title already exists")
 	}
 
 	itemID, err := u.itemRepo.InsertOneItem(pctx, &item.Item{
@@ -40,7 +41,22 @@ func (u *itemUsecase) CreateItem(pctx context.Context, req *item.CreateItemReq) 
 		UpdatedAt:   utils.LocalTime(),
 	})
 	if err != nil {
-		return "", errors.New("error: insert one item failed")
+		return nil, errors.New("error: insert one item failed")
 	}
-	return itemID.Hex(), nil
+	return u.FindOneItem(pctx, itemID.Hex())
+}
+
+func (u *itemUsecase) FindOneItem(pcxt context.Context, itemID string) (*item.ItemShowCase, error) {
+	result, err := u.itemRepo.FindOneItem(pcxt, itemID)
+	if err != nil {
+		return nil, errors.New("error: find one item failed")
+	}
+
+	return &item.ItemShowCase{
+		ItemID:   "item:" + result.ID.Hex(),
+		Title:    result.Title,
+		Price:    result.Price,
+		Damage:   result.Damage,
+		ImageUrl: result.ImageUrl,
+	}, nil
 }
