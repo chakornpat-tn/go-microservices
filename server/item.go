@@ -16,8 +16,6 @@ func (s *server) itemService() {
 	httpHandler := itemHandler.NewItemHttpHandler(s.cfg, usecase)
 	grpcHandler := itemHandler.NewItemGrpcHandler(usecase)
 
-	_ = httpHandler
-
 	go func() {
 		grpcServer, lis := grpccon.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.ItemUrl)
 		itemPb.RegisterItemGrpcServiceServer(grpcServer, grpcHandler)
@@ -29,5 +27,6 @@ func (s *server) itemService() {
 
 	// Health Check
 	item.GET("", s.healthCheckService)
+	item.POST("/item", s.middleware.JwtAuthorization(s.middleware.RbacAuthorization(httpHandler.CreateItem, []int{1, 0})))
 
 }

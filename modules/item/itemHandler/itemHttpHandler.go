@@ -1,12 +1,21 @@
 package itemHandler
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/item"
 	"github.com/chakornpat-tn/go-microservices/modules/item/itemUsecase"
+	"github.com/chakornpat-tn/go-microservices/pkg/request"
+	"github.com/chakornpat-tn/go-microservices/pkg/response"
+	"github.com/labstack/echo/v4"
 )
 
 type (
-	ItemHttpHandlerService interface{}
+	ItemHttpHandlerService interface {
+		CreateItem(c echo.Context) error
+	}
 
 	itemHttpHandler struct {
 		cfg         *config.Config
@@ -19,4 +28,23 @@ func NewItemHttpHandler(cfg *config.Config, itemUsecase itemUsecase.ItemUsecaseS
 		cfg:         cfg,
 		itemUsecase: itemUsecase,
 	}
+}
+
+func (h *itemHttpHandler) CreateItem(c echo.Context) error {
+	ctx := context.Background()
+
+	wrapper := request.ContextWrapper(c)
+
+	req := new(item.CreateItemReq)
+	if err := wrapper.Bind(req); err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.itemUsecase.CreateItem(ctx, req)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, res)
+
 }
