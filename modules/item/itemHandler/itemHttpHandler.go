@@ -3,6 +3,7 @@ package itemHandler
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/chakornpat-tn/go-microservices/config"
 	"github.com/chakornpat-tn/go-microservices/modules/item"
@@ -15,6 +16,7 @@ import (
 type (
 	ItemHttpHandlerService interface {
 		CreateItem(c echo.Context) error
+		FindOneItem(c echo.Context) error
 	}
 
 	itemHttpHandler struct {
@@ -46,5 +48,18 @@ func (h *itemHttpHandler) CreateItem(c echo.Context) error {
 	}
 
 	return response.SuccessResponse(c, http.StatusOK, res)
+
+}
+func (h *itemHttpHandler) FindOneItem(c echo.Context) error {
+	ctx := context.Background()
+
+	itemID := strings.TrimPrefix(c.Param("item_id"), "item:")
+
+	result, err := h.itemUsecase.FindOneItem(ctx, itemID)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, result)
 
 }
