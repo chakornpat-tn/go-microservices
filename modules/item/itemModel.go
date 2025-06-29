@@ -19,7 +19,7 @@ type (
 	}
 
 	ItemSearchReq struct {
-		Title string `json:"title"`
+		Title string `query:"title"`
 		models.PaginateReq
 	}
 

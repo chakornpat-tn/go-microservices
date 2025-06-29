@@ -3,7 +3,7 @@ package models
 type (
 	PaginateReq struct {
 		Start string `query:"start" validate:"max=64"`
-		Limit int    `query:"limit" validate:"required, mix=2, max=10"`
+		Limit int    `query:"limit" validate:"required,min=2,max=10"`
 	}
 
 	PaginateRes struct {
@@ -15,12 +15,12 @@ type (
 	}
 
 	FirstPaginate struct {
-		Href  string `json:"href"`
-		Start string `json:"start"`
+		Href string `json:"href"`
 	}
 
 	NextPaginate struct {
-		Href string `json:"href"`
+		Start string `json:"start"`
+		Href  string `json:"href"`
 	}
 
 	// KafkaOffset
