@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/chakornpat-tn/go-microservices/modules/item"
@@ -19,6 +20,7 @@ type (
 		CreateItem(pctx context.Context, req *item.CreateItemReq) (*item.ItemShowCase, error)
 		FindOneItem(pcxt context.Context, itemID string) (*item.ItemShowCase, error)
 		FindManyItems(pctx context.Context, basePaginateUrl string, req *item.ItemSearchReq) (*models.PaginateRes, error)
+		EditItem(pctx context.Context, itemID string, req *item.ItemUpdateReq) (*item.ItemShowCase, error)
 	}
 
 	itemUsecase struct {
@@ -111,4 +113,35 @@ func (u *itemUsecase) FindManyItems(pctx context.Context, basePaginateUrl string
 			Href:  fmt.Sprintf("%s?limit=%d&title=%s&start=%s", basePaginateUrl, req.Limit, req.Title, results[len(results)-1].ItemID),
 		},
 	}, nil
+}
+
+func (u *itemUsecase) EditItem(pctx context.Context, itemID string, req *item.ItemUpdateReq) (*item.ItemShowCase, error) {
+	updateReq := bson.M{}
+	if req.Title != "" {
+		if !u.itemRepo.IsUniqueItem(pctx, req.Title) {
+			log.Println("Error: EditItem failed: this title already exists")
+			return nil, errors.New("error: this is title already exists")
+		}
+		updateReq["title"] = req.Title
+	}
+
+	if req.ImageUrl != "" {
+		updateReq["image_url"] = req.ImageUrl
+	}
+
+	if req.Damage > 0 {
+		updateReq["damage"] = req.Damage
+	}
+
+	if req.Price >= 0 {
+		updateReq["price"] = req.Price
+	}
+
+	updateReq["updated_at"] = utils.LocalTime()
+
+	if err := u.itemRepo.UpdateOneItem(pctx, itemID, updateReq); err != nil {
+		return nil, errors.New("error: update one item failed")
+	}
+
+	return u.FindOneItem(pctx, itemID)
 }

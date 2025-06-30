@@ -18,6 +18,7 @@ type (
 		CreateItem(c echo.Context) error
 		FindOneItem(c echo.Context) error
 		FindManyItem(c echo.Context) error
+		UpdateItem(c echo.Context) error
 	}
 
 	itemHttpHandler struct {
@@ -81,4 +82,24 @@ func (h *itemHttpHandler) FindManyItem(c echo.Context) error {
 	}
 
 	return response.SuccessResponse(c, http.StatusOK, result)
+}
+
+func (h *itemHttpHandler) UpdateItem(c echo.Context) error {
+	ctx := context.Background()
+
+	itemID := strings.TrimPrefix(c.Param("item_id"), "item:")
+
+	wrapper := request.ContextWrapper(c)
+
+	req := new(item.ItemUpdateReq)
+	if err := wrapper.Bind(req); err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	res, err := h.itemUsecase.EditItem(ctx, itemID, req)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, res)
 }
