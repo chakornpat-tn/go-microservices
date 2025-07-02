@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/chakornpat-tn/go-microservices/modules/item"
+	itemPb "github.com/chakornpat-tn/go-microservices/modules/item/itemPb"
 	"github.com/chakornpat-tn/go-microservices/modules/item/itemRepository"
 	"github.com/chakornpat-tn/go-microservices/modules/models"
 	"github.com/chakornpat-tn/go-microservices/pkg/utils"
@@ -21,6 +22,7 @@ type (
 		FindOneItem(pcxt context.Context, itemID string) (*item.ItemShowCase, error)
 		FindManyItems(pctx context.Context, basePaginateUrl string, req *item.ItemSearchReq) (*models.PaginateRes, error)
 		EditItem(pctx context.Context, itemID string, req *item.ItemUpdateReq) (*item.ItemShowCase, error)
+		FindItemsInIDs(pctx context.Context, req *itemPb.FindItemsInIdsReq) (*itemPb.FindItemsInIdsRes, error)
 	}
 
 	itemUsecase struct {
@@ -144,4 +146,39 @@ func (u *itemUsecase) EditItem(pctx context.Context, itemID string, req *item.It
 	}
 
 	return u.FindOneItem(pctx, itemID)
+}
+
+func (u *itemUsecase) FindItemsInIDs(pctx context.Context, req *itemPb.FindItemsInIdsReq) (*itemPb.FindItemsInIdsRes, error) {
+	filter := bson.D{}
+	objectIds := make([]bson.ObjectID, 0)
+	for _, itemID := range req.Ids {
+		objectIds = append(objectIds, utils.ConvToObjID(strings.TrimPrefix(itemID, "item:")))
+	}
+
+	filter = append(filter, bson.E{Key: "_id", Value: bson.D{
+		{
+			Key:   "$in",
+			Value: objectIds,
+		},
+	}})
+
+	result, err := u.itemRepo.FindManyItem(pctx, filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resultToRes := make([]*itemPb.Item, 0)
+	for _, result := range result {
+		resultToRes = append(resultToRes, &itemPb.Item{
+			Id:     "item:" + result.ItemID,
+			Title:  result.Title,
+			Price:  result.Price,
+			Damage: int32(result.Damage),
+			ImgUrl: result.ImageUrl,
+		})
+	}
+
+	return &itemPb.FindItemsInIdsRes{
+		Items: resultToRes,
+	}, nil
 }
