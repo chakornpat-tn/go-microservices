@@ -23,6 +23,7 @@ type (
 		FindManyItems(pctx context.Context, basePaginateUrl string, req *item.ItemSearchReq) (*models.PaginateRes, error)
 		EditItem(pctx context.Context, itemID string, req *item.ItemUpdateReq) (*item.ItemShowCase, error)
 		FindItemsInIDs(pctx context.Context, req *itemPb.FindItemsInIdsReq) (*itemPb.FindItemsInIdsRes, error)
+		EnableOrDisableItem(pctx context.Context, itemID string) error
 	}
 
 	itemUsecase struct {
@@ -181,4 +182,18 @@ func (u *itemUsecase) FindItemsInIDs(pctx context.Context, req *itemPb.FindItems
 	return &itemPb.FindItemsInIdsRes{
 		Items: resultToRes,
 	}, nil
+}
+
+func (u *itemUsecase) EnableOrDisableItem(pctx context.Context, itemID string) error {
+	result, err := u.itemRepo.FindOneItem(pctx, itemID)
+	if err != nil {
+		return errors.New("error: find one item failed")
+	}
+
+	newUseageStatus := !result.UsageStatus
+	if err := u.itemRepo.EnableOrDisableItem(pctx, itemID, newUseageStatus); err != nil {
+		return errors.New("error: enable or disable item failed")
+	}
+
+	return nil
 }
