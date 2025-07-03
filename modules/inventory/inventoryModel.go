@@ -2,7 +2,6 @@ package inventory
 
 import (
 	"github.com/chakornpat-tn/go-microservices/modules/item"
-	"github.com/chakornpat-tn/go-microservices/modules/models"
 )
 
 type (
@@ -13,11 +12,7 @@ type (
 
 	ItemInInventory struct {
 		InventoryID string `json:"inventory_id"`
+		PlayerID    string `json:"player_id"`
 		*item.ItemShowCase
-	}
-
-	PlayerInventory struct {
-		PlayerID string `json:"player_id"`
-		*models.PaginateRes
 	}
 )

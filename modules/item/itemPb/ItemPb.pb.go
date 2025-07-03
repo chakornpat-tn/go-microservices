@@ -23,7 +23,7 @@ const (
 
 type FindItemsInIdsReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []int32                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,7 +58,7 @@ func (*FindItemsInIdsReq) Descriptor() ([]byte, []int) {
 	return file_modules_item_itemPb_itemPb_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *FindItemsInIdsReq) GetIds() []int32 {
+func (x *FindItemsInIdsReq) GetIds() []string {
 	if x != nil {
 		return x.Ids
 	}
@@ -191,7 +191,7 @@ const file_modules_item_itemPb_itemPb_proto_rawDesc = "" +
 	"\n" +
 	" modules/item/itemPb/itemPb.proto\"%\n" +
 	"\x11FindItemsInIdsReq\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x05R\x03ids\"0\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\"0\n" +
 	"\x11FindItemsInIdsRes\x12\x1b\n" +
 	"\x05items\x18\x01 \x03(\v2\x05.ItemR\x05items\"r\n" +
 	"\x04Item\x12\x0e\n" +
