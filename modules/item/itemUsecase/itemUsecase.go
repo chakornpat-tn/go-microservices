@@ -163,6 +163,8 @@ func (u *itemUsecase) FindItemsInIDs(pctx context.Context, req *itemPb.FindItems
 		},
 	}})
 
+	filter = append(filter, bson.E{Key: "usage_status", Value: true})
+
 	result, err := u.itemRepo.FindManyItem(pctx, filter, nil)
 	if err != nil {
 		return nil, err
