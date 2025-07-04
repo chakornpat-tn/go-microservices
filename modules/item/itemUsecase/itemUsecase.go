@@ -173,7 +173,7 @@ func (u *itemUsecase) FindItemsInIDs(pctx context.Context, req *itemPb.FindItems
 	resultToRes := make([]*itemPb.Item, 0)
 	for _, result := range result {
 		resultToRes = append(resultToRes, &itemPb.Item{
-			Id:     "item:" + result.ItemID,
+			Id:     result.ItemID,
 			Title:  result.Title,
 			Price:  result.Price,
 			Damage: int32(result.Damage),
