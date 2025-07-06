@@ -18,6 +18,8 @@ import (
 type (
 	InventoryUsecaseService interface {
 		FindPlayerItems(pctx context.Context, cfg *config.Config, playerID string, req *inventory.InventorySearchReq) (*models.PaginateRes, error)
+		GetOffset(pctx context.Context) (int64, error)
+		UpserOffset(pctx context.Context, offset int64) error
 	}
 
 	inventoryUsecase struct {
@@ -29,6 +31,14 @@ func NewInventoryUsecase(inventoryRepo inventoryRepository.InventoryRepositorySe
 	return &inventoryUsecase{
 		inventoryRepo: inventoryRepo,
 	}
+}
+
+func (u *inventoryUsecase) GetOffset(pctx context.Context) (int64, error) {
+	return u.inventoryRepo.GetOffset(pctx)
+}
+
+func (u *inventoryUsecase) UpserOffset(pctx context.Context, offset int64) error {
+	return u.inventoryRepo.UpserOffset(pctx, offset)
 }
 
 func (u *inventoryUsecase) FindPlayerItems(pctx context.Context, cfg *config.Config, playerID string, req *inventory.InventorySearchReq) (*models.PaginateRes, error) {
