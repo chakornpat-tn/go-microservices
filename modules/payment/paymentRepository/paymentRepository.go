@@ -2,14 +2,18 @@ package paymentRepository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"time"
 
+	"github.com/chakornpat-tn/go-microservices/config"
 	itemPb "github.com/chakornpat-tn/go-microservices/modules/item/itemPb"
 	"github.com/chakornpat-tn/go-microservices/modules/models"
+	"github.com/chakornpat-tn/go-microservices/modules/player"
 	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
 	"github.com/chakornpat-tn/go-microservices/pkg/jwtauth"
+	"github.com/chakornpat-tn/go-microservices/pkg/queue"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -20,6 +24,8 @@ type (
 		FindItemsInIDs(pctx context.Context, grpcUrl string, req *itemPb.FindItemsInIdsReq) (*itemPb.FindItemsInIdsRes, error)
 		GetOffset(pctx context.Context) (int64, error)
 		UpserOffset(pctx context.Context, offset int64) error
+		DockedPlayerMoney(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq) error
+		RollbackTransaction(pctx context.Context, cfg *config.Config, req *player.RollBackPlayerTransactionReq) error
 	}
 
 	paymentRepository struct {
@@ -95,4 +101,44 @@ func (r *paymentRepository) FindItemsInIDs(pctx context.Context, grpcUrl string,
 	}
 
 	return result, nil
+}
+
+func (r *paymentRepository) DockedPlayerMoney(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq) error {
+	reqInBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf("Error: DockedPlayerMoney failed: %s\n", err.Error())
+		return errors.New("error:docked player money failed")
+	}
+
+	if err := queue.PushMessageWithKeyToQueue([]string{cfg.Kafka.Url},
+		cfg.Kafka.ApiKey,
+		cfg.Kafka.Secret,
+		"player",
+		"buy",
+		reqInBytes); err != nil {
+		log.Printf("Error: DockedPlayerMoney failed: %s\n", err.Error())
+		return errors.New("error:docked player money failed")
+	}
+
+	return nil
+}
+
+func (r *paymentRepository) RollbackTransaction(pctx context.Context, cfg *config.Config, req *player.RollBackPlayerTransactionReq) error {
+	reqInBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf("Error: RollbackTransaction failed: %s\n", err.Error())
+		return errors.New("error:roll back transaction failed")
+	}
+
+	if err := queue.PushMessageWithKeyToQueue([]string{cfg.Kafka.Url},
+		cfg.Kafka.ApiKey,
+		cfg.Kafka.Secret,
+		"player",
+		"rtransaction",
+		reqInBytes); err != nil {
+		log.Printf("Error: RollBackTransaction failed: %s\n", err.Error())
+		return errors.New("error:roll back transaction failed")
+	}
+
+	return nil
 }

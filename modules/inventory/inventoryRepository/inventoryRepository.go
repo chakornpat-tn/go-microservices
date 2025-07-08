@@ -92,6 +92,17 @@ func (r *inventoryRepository) FindItemsInIDs(pctx context.Context, grpcUrl strin
 		return nil, errors.New("error:gRPC find items in ids failed")
 	}
 
+	if result == nil {
+		log.Printf("Error: gRPC FindItemsInIds result is nil")
+		return nil, errors.New("error:gRPC find items in ids result is nil")
+	}
+
+	if result.Items == nil {
+		log.Printf("Error: gRPC FindItemsInIds result.Items is nil")
+		return nil, errors.New("error:gRPC find items in ids result.Items is nil")
+
+	}
+
 	if len(result.Items) == 0 {
 		log.Printf("Error: gRPC FindItemsInIds failed")
 		return nil, errors.New("error:gRPC find items in ids failed")
