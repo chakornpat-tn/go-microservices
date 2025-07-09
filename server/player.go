@@ -17,7 +17,8 @@ func (s *server) playerService() {
 	grpcHandler := playerHandler.NewPlayerGrpcHandler(usecase)
 	queueHandler := playerHandler.NewPlayerQueueHanddler(s.cfg, usecase)
 
-	_ = queueHandler
+	go queueHandler.DockedPlayerMoney()
+	go queueHandler.RollBackPlayerTransaction()
 
 	go func() {
 		grpcServer, lis := grpccon.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.PlayerUrl)

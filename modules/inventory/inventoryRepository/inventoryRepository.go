@@ -8,6 +8,7 @@ import (
 
 	"github.com/chakornpat-tn/go-microservices/modules/inventory"
 	itemPb "github.com/chakornpat-tn/go-microservices/modules/item/itemPb"
+	"github.com/chakornpat-tn/go-microservices/modules/models"
 	"github.com/chakornpat-tn/go-microservices/pkg/grpccon"
 	"github.com/chakornpat-tn/go-microservices/pkg/jwtauth"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -20,6 +21,8 @@ type (
 		FindItemsInIDs(pctx context.Context, grpcUrl string, req *itemPb.FindItemsInIdsReq) (*itemPb.FindItemsInIdsRes, error)
 		FindPlayerItems(pctx context.Context, filter bson.D, opts ...options.Lister[options.FindOptions]) ([]*inventory.Inventory, error)
 		CountPlayerItems(pctx context.Context, playerID string) (int64, error)
+		GetOffset(pctx context.Context) (int64, error)
+		UpserOffset(pctx context.Context, offset int64) error
 	}
 
 	inventoryRepository struct {
@@ -31,6 +34,40 @@ func NewInventoryRepository(db *mongo.Client) InventoryRepositoryService {
 	return &inventoryRepository{
 		db: db,
 	}
+}
+
+func (r *inventoryRepository) GetOffset(pctx context.Context) (int64, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.inventoryDbConn(ctx)
+	col := db.Collection("players_inventory_queue")
+
+	result := new(models.KafkaOffset)
+	if err := col.FindOne(ctx, bson.M{}).Decode(result); err != nil {
+		log.Printf("\nError: get offset failed: %s\n", err.Error())
+		return -1, errors.New("error:get offset failed")
+	}
+
+	return result.Offset, nil
+}
+
+func (r *inventoryRepository) UpserOffset(pctx context.Context, offset int64) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.inventoryDbConn(ctx)
+	col := db.Collection("players_inventory_queue")
+
+	result, err := col.UpdateOne(ctx, bson.M{}, bson.M{"$set": bson.M{"offset": offset}}, options.UpdateOne().SetUpsert(true))
+	if err != nil {
+		log.Printf("Error: upsert offset failed: %s", err.Error())
+		return errors.New("error:upsert offset failed")
+	}
+
+	log.Printf("\n Upsert offset result: %v \n", result)
+
+	return nil
 }
 
 func (r *inventoryRepository) inventoryDbConn(pctx context.Context) *mongo.Database {
@@ -53,6 +90,17 @@ func (r *inventoryRepository) FindItemsInIDs(pctx context.Context, grpcUrl strin
 	if err != nil {
 		log.Printf("Error: gRPC FindItemsInIds failed: %s", err.Error())
 		return nil, errors.New("error:gRPC find items in ids failed")
+	}
+
+	if result == nil {
+		log.Printf("Error: gRPC FindItemsInIds result is nil")
+		return nil, errors.New("error:gRPC find items in ids result is nil")
+	}
+
+	if result.Items == nil {
+		log.Printf("Error: gRPC FindItemsInIds result.Items is nil")
+		return nil, errors.New("error:gRPC find items in ids result.Items is nil")
+
 	}
 
 	if len(result.Items) == 0 {

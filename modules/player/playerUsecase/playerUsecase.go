@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
+	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/payment"
 	"github.com/chakornpat-tn/go-microservices/modules/player"
 	playerPb "github.com/chakornpat-tn/go-microservices/modules/player/playerPb"
 	"github.com/chakornpat-tn/go-microservices/modules/player/playerRepository"
@@ -22,6 +25,10 @@ type (
 		GetPlayerSavingAccount(pctx context.Context, playerId string) (*player.PlayerSavingAccount, error)
 		FindOnePlayerCredential(pctx context.Context, email, password string) (*playerPb.PlayerProfile, error)
 		FindOnePlayerProfileToRefresh(pctx context.Context, playerID string) (*playerPb.PlayerProfile, error)
+		GetOffset(pctx context.Context) (int64, error)
+		UpserOffset(pctx context.Context, offset int64) error
+		DockedPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq)
+		RollBackPlayerTransaction(pctx context.Context, req *player.RollBackPlayerTransactionReq)
 	}
 
 	playerUsecase struct {
@@ -33,6 +40,14 @@ func NewPlayerUsecase(playerRepo playerRepository.PlayerRepositoryService) Playe
 	return &playerUsecase{
 		playerRepo: playerRepo,
 	}
+}
+
+func (u *playerUsecase) GetOffset(pctx context.Context) (int64, error) {
+	return u.playerRepo.GetOffset(pctx)
+}
+
+func (u *playerUsecase) UpserOffset(pctx context.Context, offset int64) error {
+	return u.playerRepo.UpserOffset(pctx, offset)
 }
 
 func (u *playerUsecase) CreatePlayer(pctx context.Context, req *player.CreatePlayerReq) (*player.PlayerProfile, error) {
@@ -88,7 +103,7 @@ func (u *playerUsecase) FindOnePlayer(pctx context.Context, playerID string) (*p
 }
 
 func (u *playerUsecase) AddPlayerMonney(pctx context.Context, req *player.CreatePlayerTransactionReq) (*player.PlayerSavingAccount, error) {
-	if err := u.playerRepo.InsertOnePlayerTranscation(pctx, &player.PlayerTransactions{
+	if _, err := u.playerRepo.InsertOnePlayerTranscation(pctx, &player.PlayerTransactions{
 		PlayerID:  req.PlayerID,
 		Amount:    req.Amount,
 		CreatedAt: utils.LocalTime(),
@@ -151,4 +166,65 @@ func (u *playerUsecase) FindOnePlayerProfileToRefresh(pctx context.Context, play
 		CreatedAt: result.CreatedAt.In(log).String(),
 		UpdatedAt: result.UpdatedAt.In(log).String(),
 	}, nil
+}
+
+func (u *playerUsecase) DockedPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq) {
+	savingAccount, err := u.playerRepo.GetPlayerSavingAccount(pctx, req.PlayerID)
+	if err != nil {
+		u.playerRepo.DockedPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+			TransactionID: "",
+			InventoryID:   "",
+			PlayerID:      req.PlayerID,
+			ItemID:        "",
+			Amount:        req.Amount,
+			Error:         err.Error(),
+		})
+		return
+	}
+
+	if savingAccount.Balance < math.Abs(req.Amount) {
+		log.Printf("Error: DockedPlayerMoneyRes: %s", "not enough money")
+		u.playerRepo.DockedPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+			TransactionID: "",
+			InventoryID:   "",
+			PlayerID:      req.PlayerID,
+			ItemID:        "",
+			Amount:        req.Amount,
+			Error:         "error: not enough money",
+		})
+		return
+	}
+
+	TransactionID, err := u.playerRepo.InsertOnePlayerTranscation(pctx, &player.PlayerTransactions{
+		PlayerID:  req.PlayerID,
+		Amount:    req.Amount,
+		CreatedAt: utils.LocalTime(),
+	})
+	if err != nil {
+		log.Printf("Error: DockedPlayerMoneyRes: %s", "not enough money")
+		u.playerRepo.DockedPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+			TransactionID: "",
+			InventoryID:   "",
+			PlayerID:      req.PlayerID,
+			ItemID:        "",
+			Amount:        req.Amount,
+			Error:         err.Error(),
+		})
+		return
+
+	}
+
+	u.playerRepo.DockedPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+		TransactionID: TransactionID.Hex(),
+		InventoryID:   "",
+		PlayerID:      req.PlayerID,
+		ItemID:        "",
+		Amount:        req.Amount,
+		Error:         "",
+	})
+
+}
+
+func (u *playerUsecase) RollBackPlayerTransaction(pctx context.Context, req *player.RollBackPlayerTransactionReq) {
+	u.playerRepo.DeleteOnePlayerTransaction(pctx, req.TransactionID)
 }
