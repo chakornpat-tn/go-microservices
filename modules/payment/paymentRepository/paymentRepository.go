@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/inventory"
 	itemPb "github.com/chakornpat-tn/go-microservices/modules/item/itemPb"
 	"github.com/chakornpat-tn/go-microservices/modules/models"
 	"github.com/chakornpat-tn/go-microservices/modules/player"
@@ -26,6 +27,8 @@ type (
 		UpserOffset(pctx context.Context, offset int64) error
 		DockedPlayerMoney(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq) error
 		RollbackTransaction(pctx context.Context, cfg *config.Config, req *player.RollBackPlayerTransactionReq) error
+		AddPlayerItem(pctx context.Context, cfg *config.Config, req *inventory.UpdateInventoryReq) error
+		RollbackAddPlayerItem(pctx context.Context, cfg *config.Config, req *inventory.RollbackPlayerInventory) error
 	}
 
 	paymentRepository struct {
@@ -138,6 +141,46 @@ func (r *paymentRepository) RollbackTransaction(pctx context.Context, cfg *confi
 		reqInBytes); err != nil {
 		log.Printf("Error: RollBackTransaction failed: %s\n", err.Error())
 		return errors.New("error:roll back transaction failed")
+	}
+
+	return nil
+}
+
+func (r *paymentRepository) AddPlayerItem(pctx context.Context, cfg *config.Config, req *inventory.UpdateInventoryReq) error {
+	reqInBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf("Error: AddPlayerItem failed: %s\n", err.Error())
+		return errors.New("error:add player item failed")
+	}
+
+	if err := queue.PushMessageWithKeyToQueue([]string{cfg.Kafka.Url},
+		cfg.Kafka.ApiKey,
+		cfg.Kafka.Secret,
+		"inventory",
+		"buy",
+		reqInBytes); err != nil {
+		log.Printf("Error:AddPlayerItem failed: %s\n", err.Error())
+		return errors.New("error:add player item failed")
+	}
+
+	return nil
+}
+
+func (r *paymentRepository) RollbackAddPlayerItem(pctx context.Context, cfg *config.Config, req *inventory.RollbackPlayerInventory) error {
+	reqInBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf("Error: RollbackAddPlayerItem failed: %s\n", err.Error())
+		return errors.New("error:roll back add player item failed")
+	}
+
+	if err := queue.PushMessageWithKeyToQueue([]string{cfg.Kafka.Url},
+		cfg.Kafka.ApiKey,
+		cfg.Kafka.Secret,
+		"inventory",
+		"radd",
+		reqInBytes); err != nil {
+		log.Printf("Error: RollBackAddPlayerItem failed: %s\n", err.Error())
+		return errors.New("error:roll back add player item failed")
 	}
 
 	return nil

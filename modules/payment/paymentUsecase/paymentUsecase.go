@@ -7,6 +7,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/chakornpat-tn/go-microservices/config"
+	"github.com/chakornpat-tn/go-microservices/modules/inventory"
 	"github.com/chakornpat-tn/go-microservices/modules/item"
 	itemPb "github.com/chakornpat-tn/go-microservices/modules/item/itemPb"
 	"github.com/chakornpat-tn/go-microservices/modules/payment"
@@ -117,7 +118,14 @@ func (u *paymentUsecase) BuyItem(pctx context.Context, cfg *config.Config, playe
 		res := <-resCh
 		if res != nil {
 			log.Println(res)
-			stage1 = append(stage1, res)
+			stage1 = append(stage1, &payment.PaymentTransferRes{
+				TransactionID: res.TransactionID,
+				InventoryID:   "",
+				PlayerID:      playerID,
+				ItemID:        item.ItemID,
+				Amount:        item.Price,
+				Error:         res.Error,
+			})
 		}
 
 		for _, s1 := range stage1 {
@@ -127,12 +135,56 @@ func (u *paymentUsecase) BuyItem(pctx context.Context, cfg *config.Config, playe
 						TransactionID: ss1.TransactionID,
 					})
 				}
+				return nil, errors.New("error: buy item failed")
 			}
 		}
 
 	}
 
-	return stage1, nil
+	stage2 := make([]*payment.PaymentTransferRes, 0)
+	for _, s1 := range stage1 {
+		u.paymentRepo.AddPlayerItem(pctx, cfg, &inventory.UpdateInventoryReq{
+			PlayerID: s1.PlayerID,
+			ItemID:   s1.ItemID,
+		})
+
+		resCh := make(chan *payment.PaymentTransferRes)
+		go u.BuyOrSellConsumer(pctx, "buy", cfg, resCh)
+
+		res := <-resCh
+		if res != nil {
+			log.Println(res)
+			stage2 = append(stage2, &payment.PaymentTransferRes{
+				TransactionID: s1.TransactionID,
+				InventoryID:   res.InventoryID,
+				PlayerID:      playerID,
+				ItemID:        s1.ItemID,
+				Amount:        s1.Amount,
+				Error:         s1.Error,
+			})
+		}
+	}
+
+	for _, s2 := range stage2 {
+		if s2.Error != "" {
+			for _, ss2 := range stage2 {
+				u.paymentRepo.RollbackAddPlayerItem(pctx, cfg, &inventory.RollbackPlayerInventory{
+					InventoryID: ss2.InventoryID,
+				})
+			}
+
+			for _, ss2 := range stage2 {
+				u.paymentRepo.RollbackTransaction(pctx, cfg, &player.RollBackPlayerTransactionReq{
+					TransactionID: ss2.TransactionID,
+				})
+			}
+
+			return nil, errors.New("error: buy item failed")
+		}
+
+	}
+
+	return stage2, nil
 }
 
 func (u *paymentUsecase) SellItem(pctx context.Context, cfg *config.Config, playerID string, req *payment.ItemServiceReq) ([]*payment.PaymentTransferRes, error) {
