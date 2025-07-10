@@ -29,6 +29,7 @@ type (
 		UpserOffset(pctx context.Context, offset int64) error
 		DockedPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq)
 		RollBackPlayerTransaction(pctx context.Context, req *player.RollBackPlayerTransactionReq)
+		AddPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq)
 	}
 
 	playerUsecase struct {
@@ -227,4 +228,35 @@ func (u *playerUsecase) DockedPlayerMoneyRes(pctx context.Context, cfg *config.C
 
 func (u *playerUsecase) RollBackPlayerTransaction(pctx context.Context, req *player.RollBackPlayerTransactionReq) {
 	u.playerRepo.DeleteOnePlayerTransaction(pctx, req.TransactionID)
+}
+
+func (u *playerUsecase) AddPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *player.CreatePlayerTransactionReq) {
+	TransactionID, err := u.playerRepo.InsertOnePlayerTranscation(pctx, &player.PlayerTransactions{
+		PlayerID:  req.PlayerID,
+		Amount:    req.Amount,
+		CreatedAt: utils.LocalTime(),
+	})
+	if err != nil {
+		log.Printf("Error: AddPlayerMoneyRes: %s", "not enough money")
+		u.playerRepo.AddPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+			TransactionID: "",
+			InventoryID:   "",
+			PlayerID:      req.PlayerID,
+			ItemID:        "",
+			Amount:        req.Amount,
+			Error:         err.Error(),
+		})
+		return
+
+	}
+
+	u.playerRepo.AddPlayerMoneyRes(pctx, cfg, &payment.PaymentTransferRes{
+		TransactionID: TransactionID.Hex(),
+		InventoryID:   "",
+		PlayerID:      req.PlayerID,
+		ItemID:        "",
+		Amount:        req.Amount,
+		Error:         "",
+	})
+
 }

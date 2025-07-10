@@ -31,6 +31,7 @@ type (
 		GetOffset(pctx context.Context) (int64, error)
 		UpserOffset(pctx context.Context, offset int64) error
 		DockedPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *payment.PaymentTransferRes) error
+		AddPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *payment.PaymentTransferRes) error
 	}
 
 	playerRepository struct {
@@ -268,4 +269,24 @@ func (r *playerRepository) DockedPlayerMoneyRes(pctx context.Context, cfg *confi
 
 	return nil
 
+}
+
+func (r *playerRepository) AddPlayerMoneyRes(pctx context.Context, cfg *config.Config, req *payment.PaymentTransferRes) error {
+	reqInBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf("Error: AddPlayerMoneyRes failed: %s\n", err.Error())
+		return errors.New("error:add player money res failed")
+	}
+
+	if err := queue.PushMessageWithKeyToQueue([]string{cfg.Kafka.Url},
+		cfg.Kafka.ApiKey,
+		cfg.Kafka.Secret,
+		"payment",
+		"sell",
+		reqInBytes); err != nil {
+		log.Printf("Error: AddPlayerMoneyRes failed: %s\n", err.Error())
+		return errors.New("error:add player money res failed")
+	}
+
+	return nil
 }

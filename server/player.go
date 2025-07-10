@@ -18,6 +18,7 @@ func (s *server) playerService() {
 	queueHandler := playerHandler.NewPlayerQueueHanddler(s.cfg, usecase)
 
 	go queueHandler.DockedPlayerMoney()
+	go queueHandler.AddPlayerMoney()
 	go queueHandler.RollBackPlayerTransaction()
 
 	go func() {
