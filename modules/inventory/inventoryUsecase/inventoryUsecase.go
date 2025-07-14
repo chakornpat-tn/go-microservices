@@ -166,7 +166,38 @@ func (u *inventoryUsecase) AddPlayerItemRes(pctx context.Context, cfg *config.Co
 }
 
 func (u *inventoryUsecase) RemovePlayerItemRes(pctx context.Context, cfg *config.Config, req *inventory.UpdateInventoryReq) {
+	if !u.inventoryRepo.FindOnePlayerItem(pctx, req.PlayerID, req.ItemID) {
+		u.inventoryRepo.RemovePlayerItemRes(pctx, cfg, &payment.PaymentTransferRes{
+			InventoryID:   "",
+			TransactionID: "",
+			PlayerID:      req.PlayerID,
+			ItemID:        req.ItemID,
+			Amount:        0,
+			Error:         "error: item not found",
+		})
+		return
 
+	}
+	if err := u.inventoryRepo.DeleteOnePlayerItem(pctx, req.PlayerID, req.ItemID); err != nil {
+		u.inventoryRepo.RemovePlayerItemRes(pctx, cfg, &payment.PaymentTransferRes{
+			InventoryID:   "",
+			TransactionID: "",
+			PlayerID:      req.PlayerID,
+			ItemID:        req.ItemID,
+			Amount:        0,
+			Error:         err.Error(),
+		})
+		return
+	}
+
+	u.inventoryRepo.RemovePlayerItemRes(pctx, cfg, &payment.PaymentTransferRes{
+		InventoryID:   "",
+		TransactionID: "",
+		PlayerID:      req.PlayerID,
+		ItemID:        req.ItemID,
+		Amount:        0,
+		Error:         "",
+	})
 }
 
 func (u *inventoryUsecase) RollbackAddPlayerItem(pctx context.Context, cfg *config.Config, req *inventory.RollbackPlayerInventory) {

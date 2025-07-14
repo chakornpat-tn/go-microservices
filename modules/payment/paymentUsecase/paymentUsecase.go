@@ -94,7 +94,7 @@ func (u *paymentUsecase) BuyOrSellConsumer(pctx context.Context, key string, cfg
 			}
 
 			resCh <- req
-			log.Printf("\n BuyOrSellConsumer |Topic[%s] | Partition[%d]] | Offset[%d] | Message[%s] \n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
+			log.Printf("\n BuyOrSellConsumer |Topic[%s] | Partition[%d] | Offset[%d] | Message[%s] \n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
 		}
 	}
 
@@ -191,7 +191,92 @@ func (u *paymentUsecase) SellItem(pctx context.Context, cfg *config.Config, play
 	if err := u.FindItemsInIDs(pctx, cfg.Grpc.ItemUrl, req.Items); err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	stage1 := make([]*payment.PaymentTransferRes, 0)
+	for _, item := range req.Items {
+		u.paymentRepo.RemovePlayerItem(pctx, cfg, &inventory.UpdateInventoryReq{
+			PlayerID: playerID,
+			ItemID:   item.ItemID,
+		})
+
+		resCh := make(chan *payment.PaymentTransferRes)
+
+		go u.BuyOrSellConsumer(pctx, "sell", cfg, resCh)
+
+		res := <-resCh
+		if res != nil {
+			log.Println(res)
+			stage1 = append(stage1, &payment.PaymentTransferRes{
+				InventoryID:   "",
+				TransactionID: "",
+				PlayerID:      playerID,
+				ItemID:        item.ItemID,
+				Amount:        item.Price,
+				Error:         res.Error,
+			})
+		}
+	}
+
+	for _, s1 := range stage1 {
+		if s1.Error != "" {
+			for _, ss1 := range stage1 {
+				if ss1.Error != "error: item not found" {
+					u.paymentRepo.RollbackRemovePlayerItem(pctx, cfg, &inventory.RollbackPlayerInventory{
+						PlayerID: playerID,
+						ItemID:   ss1.ItemID,
+					})
+				}
+			}
+			return nil, errors.New("error: sell item failed")
+		}
+	}
+
+	stage2 := make([]*payment.PaymentTransferRes, 0)
+	for _, s1 := range stage1 {
+		u.paymentRepo.AddPlayerMoney(pctx, cfg, &player.CreatePlayerTransactionReq{
+			PlayerID: playerID,
+			Amount:   s1.Amount * 0.5,
+		})
+
+		resCh := make(chan *payment.PaymentTransferRes)
+
+		go u.BuyOrSellConsumer(pctx, "sell", cfg, resCh)
+
+		res := <-resCh
+		if res != nil {
+			log.Println(res)
+			stage2 = append(stage2, &payment.PaymentTransferRes{
+				InventoryID:   "",
+				TransactionID: s1.TransactionID,
+				PlayerID:      playerID,
+				ItemID:        s1.ItemID,
+				Amount:        s1.Amount,
+				Error:         s1.Error,
+			})
+		}
+	}
+
+	for _, s2 := range stage2 {
+		if s2.Error != "" {
+			for _, ss2 := range stage2 {
+				u.paymentRepo.RollbackTransaction(pctx, cfg, &player.RollBackPlayerTransactionReq{
+					TransactionID: ss2.TransactionID,
+				})
+			}
+
+			for _, ss2 := range stage2 {
+				if ss2.Error != "error: item not found" {
+					u.paymentRepo.RollbackRemovePlayerItem(pctx, cfg, &inventory.RollbackPlayerInventory{
+						InventoryID: ss2.InventoryID,
+					})
+				}
+			}
+
+			return nil, errors.New("error: sell item failed")
+		}
+	}
+
+	return stage2, nil
 }
 
 func (u *paymentUsecase) FindItemsInIDs(pctx context.Context, grpcUrl string, req []*payment.ItemServiceReqDatum) error {

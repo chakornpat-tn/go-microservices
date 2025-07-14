@@ -137,5 +137,83 @@ func (h *inventoryQueueHandler) RollbackAddPlayerItem() {
 
 	}
 }
-func (h *inventoryQueueHandler) RemovePlayerItem()         {}
-func (h *inventoryQueueHandler) RollbackRemovePlayerItem() {}
+func (h *inventoryQueueHandler) RemovePlayerItem() {
+	ctx := context.Background()
+	consumer, err := h.InventoryConsumer(ctx)
+	if err != nil {
+		return
+	}
+
+	log.Println("Start RemovePlayerItem....")
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	defer consumer.Close()
+
+	for {
+
+		select {
+		case err := <-consumer.Errors():
+			log.Println("Error: RemovePlayerItem", err.Error())
+			continue
+		case msg := <-consumer.Messages():
+			if string(msg.Key) == "sell" {
+				h.inventoryUsecase.UpserOffset(ctx, msg.Offset+1)
+
+				req := new(inventory.UpdateInventoryReq)
+				if err := queue.DecodeMessage(req, msg.Value); err != nil {
+					continue
+				}
+
+				h.inventoryUsecase.RemovePlayerItemRes(ctx, h.cfg, req)
+
+				log.Printf("\n RemovePlayerItem |Topic[%s] | Partition[%d]] | Offset[%d] | Message[%s] \n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
+			}
+		case <-sigChan:
+			log.Println("Stop RemovePlayerItem")
+			return
+		}
+
+	}
+}
+func (h *inventoryQueueHandler) RollbackRemovePlayerItem() {
+	ctx := context.Background()
+	consumer, err := h.InventoryConsumer(ctx)
+	if err != nil {
+		return
+	}
+
+	log.Println("Start RollbackRemovePlayerItem....")
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	defer consumer.Close()
+
+	for {
+
+		select {
+		case err := <-consumer.Errors():
+			log.Println("Error: RollbackRemovePlayerItem", err.Error())
+			continue
+		case msg := <-consumer.Messages():
+			if string(msg.Key) == "rremove" {
+				h.inventoryUsecase.UpserOffset(ctx, msg.Offset+1)
+
+				req := new(inventory.RollbackPlayerInventory)
+				if err := queue.DecodeMessage(req, msg.Value); err != nil {
+					continue
+				}
+
+				h.inventoryUsecase.RollbackRemovePlayerItem(ctx, h.cfg, req)
+
+				log.Printf("\n RollbackRemovePlayerItem |Topic[%s] | Partition[%d]] | Offset[%d] | Message[%s] \n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
+			}
+		case <-sigChan:
+			log.Println("Stop RollbackRemovePlayerItem")
+			return
+		}
+
+	}
+}

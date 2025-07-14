@@ -70,7 +70,7 @@ func (h *paymentHttpHandler) SellItem(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	res, err := h.paymentUsecase.BuyItem(ctx, h.cfg, playerID, req)
+	res, err := h.paymentUsecase.SellItem(ctx, h.cfg, playerID, req)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusInternalServerError, err.Error())
 	}
